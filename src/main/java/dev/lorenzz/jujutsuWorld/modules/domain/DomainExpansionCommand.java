@@ -12,6 +12,7 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -34,36 +35,70 @@ public final class DomainExpansionCommand extends BaseCommand {
     @Default
     public void onDomainExpansion(Player player) {
         String worldName = "domain_" + player.getName().toLowerCase();
-        UUID uuid = player.getUniqueId();
         String name = player.getName();
 
         send(player, "domain-expansion-creating", worldName, name);
 
-        World world = Bukkit.getWorld(worldName);
-        if (world == null) {
-            world = createDomain(worldName);
-            if (world == null) {
-                send(player, "domain-expansion-failed", worldName, name);
-                return;
-            }
-            registerDomain(uuid, name, worldName, player);
-        } else {
+        World existing = Bukkit.getWorld(worldName);
+        if (existing != null) {
             send(player, "domain-expansion-already", worldName, name);
+            complete(player, existing, worldName, name, false);
+            return;
         }
 
-        playDomainSounds(player);
-        player.teleport(world.getSpawnLocation());
+        if (useBulMultiverse()) {
+            createViaBulMultiverse(player, worldName, name);
+            return;
+        }
+
+        rawFallback(player, worldName, name);
     }
 
-    private World createDomain(String worldName) {
-        if (useBulMultiverse()) {
-            World viaBmv = createViaBulMultiverse(worldName);
-            if (viaBmv != null) {
-                return viaBmv;
-            }
-            JujutsuWorld.getInstance().getLogger().warning(
-                    "BulMultiverse create failed for " + worldName + " — falling back to raw WorldCreator.");
+    private void createViaBulMultiverse(Player player, String worldName, String name) {
+        if (BulMultiverseUtil.isBulMultiverseMissing()) {
+            rawFallback(player, worldName, name);
+            return;
         }
+        CommandSender console = Bukkit.getConsoleSender();
+        boolean folderExisted = BulMultiverseUtil.worldFolderExists(worldName);
+        if (folderExisted) {
+            Bukkit.dispatchCommand(console, "bmv load " + worldName);
+        } else {
+            Bukkit.dispatchCommand(console, "bmv create " + worldName + " -t " + worldTypeName());
+        }
+
+        new BukkitRunnable() {
+            private int ticks;
+
+            @Override
+            public void run() {
+                World world = Bukkit.getWorld(worldName);
+                if (world != null) {
+                    cancel();
+                    complete(player, world, worldName, name, !folderExisted);
+                    return;
+                }
+                if (++ticks >= 60) {
+                    cancel();
+                    JujutsuWorld.getInstance().getLogger().warning(
+                            "BulMultiverse did not surface world " + worldName
+                                    + " within 3s — falling back to raw WorldCreator.");
+                    rawFallback(player, worldName, name);
+                }
+            }
+        }.runTaskTimer(JujutsuWorld.getInstance(), 1L, 1L);
+    }
+
+    private void rawFallback(Player player, String worldName, String name) {
+        World world = createDomainRaw(worldName);
+        if (world == null) {
+            send(player, "domain-expansion-failed", worldName, name);
+            return;
+        }
+        complete(player, world, worldName, name, true);
+    }
+
+    private World createDomainRaw(String worldName) {
         try {
             WorldCreator wc = WorldCreator.name(worldName).environment(World.Environment.NORMAL);
             wc.type(parseWorldType());
@@ -79,21 +114,18 @@ public final class DomainExpansionCommand extends BaseCommand {
         }
     }
 
-    private World createViaBulMultiverse(String worldName) {
-        if (BulMultiverseUtil.isBulMultiverseMissing()) {
-            return null;
+    private void complete(Player player, World world, String worldName, String name, boolean isNew) {
+        if (isNew) {
+            registerDomain(player.getUniqueId(), name, worldName, player);
         }
-        World existing = Bukkit.getWorld(worldName);
-        if (existing != null) {
-            return existing;
-        }
-        if (BulMultiverseUtil.worldFolderExists(worldName)) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "bmv load " + worldName);
-        } else {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-                    "bmv create " + worldName + " -t " + worldTypeName());
-        }
-        return Bukkit.getWorld(worldName);
+        playDomainSounds(player);
+        player.teleport(world.getSpawnLocation());
+    }
+
+    private void registerDomain(UUID uuid, String name, String worldName, Player player) {
+        repo.savePersonalWorld(uuid, name, worldName, PersonalWorldRepository.Status.CREATED)
+                .thenAccept(ok -> Bukkit.getScheduler().runTask(JujutsuWorld.getInstance(), () ->
+                        send(player, ok ? "domain-expansion-success" : "domain-expansion-db-error", worldName, name)));
     }
 
     private boolean useBulMultiverse() {
@@ -108,12 +140,6 @@ public final class DomainExpansionCommand extends BaseCommand {
         } catch (IllegalArgumentException ex) {
             return "FLAT";
         }
-    }
-
-    private void registerDomain(UUID uuid, String name, String worldName, Player player) {
-        repo.savePersonalWorld(uuid, name, worldName, PersonalWorldRepository.Status.CREATED)
-                .thenAccept(ok -> Bukkit.getScheduler().runTask(JujutsuWorld.getInstance(), () ->
-                        send(player, ok ? "domain-expansion-success" : "domain-expansion-db-error", worldName, name)));
     }
 
     private WorldType parseWorldType() {

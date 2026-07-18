@@ -36,6 +36,8 @@ public final class DatabaseManager implements Manager {
         HikariConfig hc = new HikariConfig();
         hc.setPoolName("JujutsuWorld-Hikari");
         hc.setJdbcUrl(url);
+
+        hc.setDriverClassName("dev.lorenzz.libs.mariadb.jdbc.Driver");
         hc.setUsername(user);
         hc.setPassword(pass);
         hc.setMaximumPoolSize(10);
