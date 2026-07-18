@@ -1,0 +1,5 @@
+name: JujutsuWorld
+version: '${version}'
+
+main: dev.lorenzz.jujutsuWorld.JujutsuWorld
+api-version: '1.21'

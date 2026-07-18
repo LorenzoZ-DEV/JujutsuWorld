@@ -1,0 +1,13 @@
+STORAGE:
+  type: "mysql"
+  IP: "localhost"
+  PORT: 3306
+  USERNAME: "root"
+  DATABASE: "db"
+  PASSWORD: "password"
+
+MODULES:
+  world-manager: true
+
+HOOKS:
+  Bulmultiverse: true
