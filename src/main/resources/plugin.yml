@@ -4,7 +4,6 @@ version: '${version}'
 main: dev.lorenzz.jujutsuWorld.JujutsuWorld
 api-version: '1.21'
 
-# BulMultiverse manages personal worlds when HOOKS.Bulmultiverse=true; soft-depend so it loads first.
 softdepend: [BulMultiverse]
 
 permissions:

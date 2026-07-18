@@ -16,9 +16,6 @@ dependencies {
 
     implementation("com.zaxxer:HikariCP:6.3.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
-    // ponytail: repo.aikar.co no longer serves acf artifacts (404 on metadata paths);
-    // the 0.5.1-SNAPSHOT acf-paper fat jar (BaseCommand + BukkitCommandManager + annotations,
-    // no MinecraftReflection probe → 1.21-safe) is vendored under libs/ as a file dependency.
     implementation(files("libs/acf-paper-0.5.1-SNAPSHOT.jar"))
 
 }
