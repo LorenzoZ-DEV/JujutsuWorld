@@ -12,12 +12,8 @@ MODULES:
 HOOKS:
   Bulmultiverse: true
 
-# Personal domain creation for /domainexpansion
 DOMAIN:
-  # Bukkit world type: NORMAL, FLAT, LARGE_BIOMES, AMPLIFIED (FLAT = clean pocket dimension)
   world-type: FLAT
-  # Played in sequence when a domain opens. delay = ticks after the command runs.
-  # Valid 1.21 sounds e.g. BLOCK_BEACON_ACTIVATE, BLOCK_END_PORTAL_SPAWN, ENTITY_ENDER_DRAGON_GROWL
   sounds:
     - sound: BLOCK_BEACON_ACTIVATE
       volume: 1.0
