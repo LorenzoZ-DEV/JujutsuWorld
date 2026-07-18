@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.JukeboxSong;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ManagerService
@@ -17,11 +18,18 @@ public class ManagerService
 
     public void start() {
         instance = this;
+        this.managers = new ArrayList<>();
         registerManagers();
 
     }
 
     public void stop (){
+        if (managers == null) {
+            if (instance != null) {
+                instance = null;
+            }
+            return;
+        }
         for (Manager manager : managers) {
             manager.stop();
         }
@@ -32,8 +40,7 @@ public class ManagerService
     }
 
     private void registerManagers(){
-        //todo registrare i manager generali
-        addManager(ModuleManger);
+        addManager(new ModuleManger(), "ModuleManager");
     }
 
     private void addManager(final Manager manager, final String name){
