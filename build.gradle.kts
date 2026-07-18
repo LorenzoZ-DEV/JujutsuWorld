@@ -16,7 +16,10 @@ dependencies {
 
     implementation("com.zaxxer:HikariCP:6.3.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.3")
-    implementation ("co.aikar:acf-spigot:0.5.1-SNAPSHOT")
+    // ponytail: repo.aikar.co no longer serves acf artifacts (404 on metadata paths);
+    // the 0.5.1-SNAPSHOT acf-paper fat jar (BaseCommand + BukkitCommandManager + annotations,
+    // no MinecraftReflection probe → 1.21-safe) is vendored under libs/ as a file dependency.
+    implementation(files("libs/acf-paper-0.5.1-SNAPSHOT.jar"))
 
 }
 
@@ -35,6 +38,7 @@ tasks {
         relocate("com.zaxxer.hikari", "dev.lorenzz.libs.hikari")
         relocate("org.mariadb", "dev.lorenzz.libs.mariadb")
         relocate("co.aikar.commands", "dev.lorenzz.libs.acf")
+        relocate("co.aikar.locales", "dev.lorenzz.libs.acf.locales")
         mergeServiceFiles()
         exclude("org/slf4j/**")
     }

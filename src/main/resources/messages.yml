@@ -1,2 +1,13 @@
 MESSAGES:
-  domain-expansion-creating: "&d&lDOMAIN EXPANSION &8» &7preparing your personal domain... {worldname}"
+  prefix: "&d&lDOMAIN EXPANSION &8» "
+  no-permission: "&cNessun Permesso."
+
+  domain-expansion-creating: "&7Sto preparando il tuo dominio personale &8({worldname})&7, {player}..."
+  domain-expansion-success: "&aDominio &f{worldname} &acreato. Benvenuto, &f{player}&a."
+  domain-expansion-already: "&7Il tuo dominio &f{worldname} &7esiste già, ti sto portando dentro..."
+  domain-expansion-failed: "&cCreazione del dominio fallita. Controlla la console."
+  domain-expansion-db-error: "&cImpossibile registrare il dominio nel database."
+
+  admin-usage: "&7Utilizzo: &d/expansionadmin reload"
+  admin-reload-success: "&aConfig & messages ricaricati."
+  admin-reload-error: "&cReload fallito: {error}"

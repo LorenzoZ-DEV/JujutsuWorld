@@ -3,3 +3,14 @@ version: '${version}'
 
 main: dev.lorenzz.jujutsuWorld.JujutsuWorld
 api-version: '1.21'
+
+# BulMultiverse manages personal worlds when HOOKS.Bulmultiverse=true; soft-depend so it loads first.
+softdepend: [BulMultiverse]
+
+permissions:
+  jujutsu.domainexpansion.use:
+    description: Permette di creare un dominio personale con /domainexpansion.
+    default: true
+  jujutsu.admin.reload:
+    description: Permette di ricaricare la configurazione con /expansionadmin reload.
+    default: op
